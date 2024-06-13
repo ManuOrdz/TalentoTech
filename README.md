@@ -4,7 +4,4 @@ Este repositorio esta dedicado a la recopilación de las actividades llevadas a 
 
 # Contacto
 **José Manuel Ordóñez Silva**  
-
-Estudiante 9no Semestre de Ingeniería Física
-
 **Email:** manuelordz@unicauca.edu.co
