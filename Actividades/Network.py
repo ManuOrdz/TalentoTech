@@ -56,7 +56,7 @@ class Network():
             
     def backprop(self, x, y):
         nabla_b = [np.zeros(b.shape) for b in self.biases]
-        nabla_W = [np.zeros(w.shape) for w in self.weights]
+        nabla_w = [np.zeros(w.shape) for w in self.weights]
         
         activation = x
         activations = [x]
@@ -68,7 +68,40 @@ class Network():
             zs.append(z)
             activation = self.activation_function(z)
             activations.append(activation)
+        
+        delta = self.cost_derivative(activations[-1],y) * \
+            self.activation_prime(zs[-1])
             
+        nabla_b[-1] = delta
+        nabla_w[-1] = np.dot(delta, activations[-2].transpose())   
+        for l in np.arange(2, self.num_layers):
+            z = zs[-l]
+            sp = self.activation_prime(z)
+            nabla_b[-l] = delta  
+            nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
+        return(nabla_b, nabla_w)
+            
+    def evaluate(self, test_data):
+        test_results = [(np.argmax(self.feedfoward(x)),y)
+                        for (x,y) in test_data] 
+        return sum(int(x == y) for (x,y) in test_results)       
+    
+    def cost_derivative(self, output_activations, y):
+        return (output_activations-y)
+    
+    def activation_prime(self, z):
+        if self.activation == 'linear':
+            return np.zeros(z.shape)
+        
+        if self.activation == 'relu':
+            return z
+        
+        if self.activation == 'sigmoid':
+            return self.activation_function(z)*(1-self.activation_function(z))
+            
+        if self.activation == 'tanh':
+            return  np.tanh(z)
+        
     def activation_function(self, z):
         if self.activation == 'linear':
             return z
