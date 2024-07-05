@@ -80,6 +80,7 @@ class Dense(Network):
 #Relu activation
 class Relu(Activation):
     def forward(self,inputs):
+        self.inputs = inputs.copy()
         self.output = np.maximum(0,inputs)
     
     def backward(self, dvalues):
@@ -96,19 +97,39 @@ class Softmax(Activation):
         pass
 
     def backward(self, dvalues):
-            self.dinputs = np.empty_like(dvalues)
-            
-            for index, (single_output, single_dvalues) in \
-                enumerate(zip(self,output,dvalues)):
+        self.dinputs = np.empty_like(dvalues)
+        
+        for index, (single_output, single_dvalues) in \
+            enumerate(zip(self,output,dvalues)):
+                
+                single_output = single_output.reshape(-1,1)
+                
+                jacobian_matrix = np.diagflat(single_output) - \
+                    np.dot(single_output, single_output.T)
                     
-                    single_output = single_output.reshape(-1,1)
-                    
-                    jacobian_matrix = np.diagflat(single_output) - \
-                        np.dot(single_output, single_output.T)
-                        
-                    self.dinputs[index] =np.dot(jacobian_matrix,
-                                                single_dvalues)
+                self.dinputs[index] =np.dot(jacobian_matrix,
+                                            single_dvalues)
 
+class SoftmaxCategoricalCrossentropy():
+    def __init__(self):
+        self.activation = Softmax()
+        self.loss = CategoricalCrossentrotpy()
+        
+    def forward(self, inputs, y_true):
+        self.activation.forward(inputs)
+        self.output = self.activation.output
+        return self.loss.calulate(self.output, y_true)
+
+    def backward(self, dvalues, y_true):
+        samples = len(dvalues)
+        
+        if len(y_true.shape) == 2:
+            y_true = np.argmax(y_true,axis=1)
+            
+        self.dinputs = dvalues.copy()
+        self.dinputs[range(samples), y_true] -= 1
+        self.dinputs = self.dinputs / samples
+    
 class SGD(object):
     def __init__(self, learning_rate = 1., decay = 0., momentum = 0.):
         self.learning_rate = learning_rate
