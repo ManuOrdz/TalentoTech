@@ -1,5 +1,5 @@
 from Network import Dense,Relu,Softmax,CategoricalCrossentrotpy, SoftmaxCategoricalCrossentropy, SGD
-from sklearn.datasets import make_moons
+from sklearn.datasets import make_moons 
 import numpy as np
 
 
